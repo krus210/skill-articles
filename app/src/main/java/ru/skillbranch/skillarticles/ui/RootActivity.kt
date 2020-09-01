@@ -4,9 +4,9 @@ import android.app.SearchManager
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -22,10 +22,12 @@ import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
 import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
 
+
 class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
     private lateinit var searchView: SearchView
+    private lateinit var searchMenuItem: MenuItem
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +49,13 @@ class RootActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.options_menu, menu)
-        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        searchView = (menu.findItem(R.id.search_view).actionView as SearchView).apply {
-            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+        searchMenuItem = menu.findItem(R.id.action_search)
+        searchView = searchMenuItem.actionView as SearchView
+
+        viewModel.observeState(this) {
+            renderActionSearch(it)
         }
-        setupSearchView()
+        setupActionSearch()
         return true
     }
 
@@ -83,7 +87,7 @@ class RootActivity : AppCompatActivity() {
         snackbar.show()
     }
 
-    private fun setupSearchView() {
+    private fun setupActionSearch() {
         searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 viewModel.handleSearchMode(true)
@@ -101,6 +105,13 @@ class RootActivity : AppCompatActivity() {
                 return false
             }
         })
+    }
+
+    private fun renderActionSearch(data: ArticleState) {
+        if (data.isSearch) searchMenuItem.expandActionView()
+        if (searchView.query.isNullOrEmpty() && !data.searchQuery.isNullOrEmpty()) {
+            searchView.setQuery(data.searchQuery, false)
+        }
     }
 
     private fun setupSubmenu() {
@@ -149,14 +160,6 @@ class RootActivity : AppCompatActivity() {
         toolbar.title = data.title ?: "loading"
         toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
-
-        //bind searchView
-        if (data.isSearch) searchView.onActionViewExpanded()
-
-        //bind searchQuery
-        if (searchView.query.isNullOrEmpty() && !data.searchQuery.isNullOrEmpty()) {
-            searchView.setQuery(data.searchQuery, false)
-        }
     }
 
     private fun setupToolbar() {
