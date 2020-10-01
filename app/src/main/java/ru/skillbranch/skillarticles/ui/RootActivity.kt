@@ -68,7 +68,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         Log.d("result", searchResult.toString())
         val content = tv_text_content.text as Spannable
 
-        //clear entry search result
+        //clear entry search result (hometask_4)
         clearSearchResult()
 
         searchResult.forEach { (start, end) ->
