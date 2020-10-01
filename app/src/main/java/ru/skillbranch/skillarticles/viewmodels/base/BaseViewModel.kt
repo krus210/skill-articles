@@ -1,9 +1,11 @@
-package ru.skillbranch.skillarticles.viewmodels
+package ru.skillbranch.skillarticles.viewmodels.base
 
+import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.lifecycle.*
+import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 
-abstract class BaseViewModel<T>(initState: T) : ViewModel() {
+abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
 
     val notifications = MutableLiveData<Event<Notify>>()
 
@@ -38,12 +40,13 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
     }
 
     /***
-    *более компактная форма записи observe вызывает лямбда-выражение-обработчик только в том случае
-    *если сообщение не было уже обработанно, реализует данное поведение благодаря EventObserver
-    */
+     *более компактная форма записи observe вызывает лямбда-выражение-обработчик только в том случае
+     *если сообщение не было уже обработанно, реализует данное поведение благодаря EventObserver
+     */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
         notifications.observe(owner, EventObserver {
-            onNotify(it)})
+            onNotify(it)
+        })
     }
 
     /***
@@ -60,14 +63,13 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
         }
     }
 
-}
+    fun saveState(outState: Bundle) {
+        currentState.save(outState)
+    }
 
-class ViewModelFactory(private val params: String) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ArticleViewModel::class.java)) {
-            return ArticleViewModel(params) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    @Suppress("UNCHECKED_CAST")
+    fun restoreState(savedState: Bundle) {
+        state.value = currentState.restore(savedState) as T
     }
 }
 
@@ -106,11 +108,11 @@ sealed class Notify(val message: String) {
         val msg: String,
         val actionLAbel: String,
         val actionHandler: (() -> Unit)?
-    ): Notify(msg)
+    ) : Notify(msg)
 
     data class ErrorMessage(
         val msg: String,
         val errorLAbel: String,
         val errorHandler: (() -> Unit)?
-    ): Notify(msg)
+    ) : Notify(msg)
 }

@@ -26,6 +26,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
@@ -35,6 +36,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_16dp"
+            android:focusable="true"
+            android:saveEnabled="false"
+            android:focusableInTouchMode="true"
             android:text="@string/loading"/>
         
     </androidx.core.widget.NestedScrollView>
@@ -50,7 +54,8 @@
         android:elevation="@dimen/elevation_dp"
         app:layout_dodgeInsetEdges="bottom"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible"
+        app:layout_behavior=".ui.custom.behaviors.SubmenuBehavior"/>
 
     <ru.skillbranch.skillarticles.ui.custom.Bottombar
         android:id="@+id/bottombar"
