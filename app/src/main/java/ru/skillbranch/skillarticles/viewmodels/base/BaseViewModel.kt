@@ -3,7 +3,6 @@ package ru.skillbranch.skillarticles.viewmodels.base
 import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.lifecycle.*
-import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 
 abstract class BaseViewModel<T : IViewModelState>(initState: T) : ViewModel() {
 
@@ -101,18 +100,20 @@ class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Obser
 
 }
 
-sealed class Notify(val message: String) {
-    data class TextMessage(val msg: String) : Notify(msg)
+sealed class Notify() {
+    abstract val message: String
+    data class TextMessage(override val message: String) : Notify()
+
 
     data class ActionMessage(
-        val msg: String,
+        override val message: String,
         val actionLAbel: String,
         val actionHandler: (() -> Unit)?
-    ) : Notify(msg)
+    ) : Notify()
 
     data class ErrorMessage(
-        val msg: String,
+        override val message: String,
         val errorLAbel: String,
         val errorHandler: (() -> Unit)?
-    ) : Notify(msg)
+    ) : Notify()
 }
