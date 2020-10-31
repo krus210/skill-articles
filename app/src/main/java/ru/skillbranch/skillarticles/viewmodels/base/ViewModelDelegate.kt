@@ -12,8 +12,8 @@ class ViewModelDelegate<T : ViewModel>(private val clazz: Class<T>, private val 
     private lateinit var value: T
     override fun getValue(thisRef: FragmentActivity, property: KProperty<*>): T {
         if (!::value.isInitialized) value = when (arg) {
-            null -> ViewModelProvider(thisRef).get(clazz)
-            else -> ViewModelProvider(thisRef,
+            null -> ViewModelProviders.of(thisRef).get(clazz)
+            else -> ViewModelProviders.of(thisRef,
                 ViewModelFactory(arg)
             ).get(clazz)
         }
