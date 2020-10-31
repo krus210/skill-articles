@@ -35,7 +35,7 @@ class InlineCodeSpan(
             val measureText = paint.measureText(text.toString(), start, end)
             measureWidth = (measureText + 2*padding).toInt()
         }
-        return 0
+        return measureWidth
     }
 
     override fun draw(

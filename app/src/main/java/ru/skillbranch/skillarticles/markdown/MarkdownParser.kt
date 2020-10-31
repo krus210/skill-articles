@@ -38,7 +38,8 @@ object MarkdownParser {
     /**
      * clear markdown text to string without markdown characters
      */
-    fun clear(string: String): String? {
+    fun clear(string: String?): String? {
+        if (string == null) return null
         val newString = StringBuilder(string)
         var isClearText = 0
         while (isClearText == 0) {
@@ -261,18 +262,4 @@ sealed class Element {
         override val text: CharSequence, //for insert span
         override val elements: List<Element> = emptyList()
     ) : Element()
-
-    data class OrderedListItem(
-        val order: String,
-        override val text: CharSequence,
-        override val elements: List<Element> = emptyList()
-    ) : Element()
-
-    data class BlockCode(
-        val type: Type = Type.MIDDLE,
-        override val text: CharSequence,
-        override val elements: List<Element> = emptyList()
-    ) : Element() {
-        enum class Type { START, END, MIDDLE, SINGLE }
-    }
 }

@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.text.getSpans
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -64,7 +65,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
         Log.d("result", searchResult.toString())
         val content = tv_text_content.text as Spannable
-
+        tv_text_content.isVisible
         //clear entry search result (hometask_4)
         clearSearchResult()
 
@@ -77,8 +78,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             )
         }
 
-        //scrolled to first searched element
-        renderSearchPosition(0)
+//        //scrolled to first searched element
+//        renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
@@ -127,7 +128,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         if (binding.isSearch) {
             menuItem?.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
-            searchView.clearFocus()
+//            searchView.clearFocus()
 
             if (binding.isFocusedSearch) searchView?.requestFocus()
             else searchView?.clearFocus()
@@ -157,7 +158,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             }
         })
 
-        return true
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun renderNotification(notify: Notify) {
@@ -168,18 +169,25 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             is Notify.TextMessage -> {/*nothing*/
             }
             is Notify.ActionMessage -> {
-                snackbar.setActionTextColor(getColor(R.color.color_accent_dark))
-                snackbar.setAction(notify.actionLAbel) {
-                    notify.actionHandler?.invoke()
+                val (_, label, handler) = notify
+
+                with (snackbar) {
+                    setActionTextColor(getColor(R.color.color_accent_dark))
+                    setAction(label) {
+                        handler?.invoke()
+                    }
                 }
             }
             is Notify.ErrorMessage -> {
+                val (_, label, handler) = notify
+
                 with(snackbar) {
                     setBackgroundTint(getColor(R.color.design_default_color_error))
                     setTextColor(getColor(android.R.color.white))
                     setActionTextColor(getColor(android.R.color.white))
-                    setAction(notify.errorLAbel) {
-                        notify.errorHandler?.invoke()
+                    handler ?: return@with
+                    setAction(label) {
+                        handler?.invoke()
                     }
                 }
             }

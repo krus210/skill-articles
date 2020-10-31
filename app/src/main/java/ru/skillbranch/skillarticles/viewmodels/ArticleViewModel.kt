@@ -10,6 +10,7 @@ import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
+import ru.skillbranch.skillarticles.markdown.MarkdownParser
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
@@ -18,6 +19,7 @@ class ArticleViewModel(private val articleId: String) :
     BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
 
     private val repository = ArticleRepository
+    private var clearContent: String? = null
 
     init {
         //subscribe on mutable data
@@ -29,9 +31,7 @@ class ArticleViewModel(private val articleId: String) :
                 category = article.category,
                 categoryIcon = article.categoryIcon,
                 date = article.date.format(),
-                author = article.author,
-                poster = article.poster,
-                content = article.content
+                author = article.author
             )
         }
 
@@ -88,13 +88,13 @@ class ArticleViewModel(private val articleId: String) :
     }
 
     override fun handleLike() {
-
+        val isLiked = currentState.isLike
         val toggleLike: () -> Unit = {
             val info = currentState.toArticlePersonalInfo()
             repository.updateArticlePersonalInfo(info.copy(isLike = !info.isLike))
         }
         toggleLike()
-        val msg = if (currentState.isLike) Notify.TextMessage("Mark is liked")
+        val msg = if (!isLiked) Notify.TextMessage("Mark is liked")
         else {
             Notify.ActionMessage(
                 "Don`t like it anymore", // message
@@ -106,16 +106,12 @@ class ArticleViewModel(private val articleId: String) :
     }
 
     override fun handleBookmark() {
-        val toggleBookmark: () -> Unit = {
-            val info = currentState.toArticlePersonalInfo()
-            repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
-        }
-        toggleBookmark()
-        val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks")
-        else {
-            Notify.TextMessage("Remove from bookmarks")
-        }
-        notify(msg)
+        val info = currentState.toArticlePersonalInfo()
+        repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
+
+        val msg = if (currentState.isBookmark) "Add to bookmarks"
+        else "Remove from bookmarks"
+        notify(Notify.TextMessage(msg))
     }
 
     //not implemented
@@ -134,7 +130,8 @@ class ArticleViewModel(private val articleId: String) :
 
     override fun handleSearch(query: String?) {
         query ?: return
-        val result = currentState.content
+        if (clearContent == null) clearContent = MarkdownParser.clear(currentState.content)
+        val result = clearContent
             .indexesOf(query)
             .map { it to it + query.length }
         updateState { it.copy(searchQuery = query, searchResults = result, searchPosition = 0) }
@@ -187,6 +184,7 @@ data class ArticleState(
     }
 
     override fun restore(savedState: Bundle): IViewModelState {
+        @Suppress("UNCHECKED_CAST")
         return copy(
             isSearch = savedState["isSearch"] as Boolean,
             searchQuery = savedState["searchQuery"] as? String,

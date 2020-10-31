@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.markdown
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
@@ -27,7 +28,8 @@ class MarkdownBuilder(context: Context) {
     private val headerMarginBottom = context.dpToPx(8)
     private val ruleWidth = context.dpToPx(2)
     private val cornerRadius = context.dpToPx(8)
-//    private val linkIcon = context.getDrawable(R.drawable.ic_link_black_24dp)!!
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private val linkIcon = context.getDrawable(R.drawable.ic_link_black_24dp)!!
 
     fun markdownToSpan(string: String): SpannedString {
         val markdown = MarkdownParser.parse(string)
@@ -96,14 +98,14 @@ class MarkdownBuilder(context: Context) {
                         append(element.text)
                     }
                 }
-//                is Element.Link -> {
-//                    inSpans(
-//                        IconLinkSpan(linkIcon, colorSecondary, gap, colorPrimary, strikeWidth),
-//                        URLSpan(element.link)
-//                    ) {
-//                        append(element.text)
-//                    }
-//                }
+                is Element.Link -> {
+                    inSpans(
+                        IconLinkSpan(linkIcon, colorSecondary, gap, colorPrimary, strikeWidth),
+                        URLSpan(element.link)
+                    ) {
+                        append(element.text)
+                    }
+                }
 
                 else -> append(element.text)
             }
