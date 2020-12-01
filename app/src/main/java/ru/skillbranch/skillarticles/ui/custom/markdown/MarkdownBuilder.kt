@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown
+package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,9 +11,11 @@ import android.text.style.URLSpan
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.repositories.Element
+import ru.skillbranch.skillarticles.data.repositories.MarkdownParser
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToPx
-import ru.skillbranch.skillarticles.markdown.spans.*
+import ru.skillbranch.skillarticles.ui.custom.spans.*
 
 class MarkdownBuilder(context: Context) {
     private val colorSecondary = context.attrValue(R.attr.colorSecondary)
@@ -29,7 +31,9 @@ class MarkdownBuilder(context: Context) {
     private val ruleWidth = context.dpToPx(2)
     private val cornerRadius = context.dpToPx(8)
     @SuppressLint("UseCompatLoadingForDrawables")
-    private val linkIcon = context.getDrawable(R.drawable.ic_link_black_24dp)!!
+    private val linkIcon = context.getDrawable(R.drawable.ic_link_black_24dp)!!.apply {
+        setTint(colorSecondary)
+    }
 
     fun markdownToSpan(string: String): SpannedString {
         val markdown = MarkdownParser.parse(string)
@@ -100,7 +104,7 @@ class MarkdownBuilder(context: Context) {
                 }
                 is Element.Link -> {
                     inSpans(
-                        IconLinkSpan(linkIcon, colorSecondary, gap, colorPrimary, strikeWidth),
+                        IconLinkSpan(linkIcon, gap, colorPrimary, strikeWidth),
                         URLSpan(element.link)
                     ) {
                         append(element.text)
