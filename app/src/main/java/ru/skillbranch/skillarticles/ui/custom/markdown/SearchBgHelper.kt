@@ -12,6 +12,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.*
+import ru.skillbranch.skillarticles.ui.custom.spans.HeaderSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -95,6 +96,7 @@ class SearchBgHelper(
     }
 
     private lateinit var spans: Array<out SearchSpan>
+    private lateinit var headerSpans: Array<out HeaderSpan>
 
     private var spanStart = 0
     private var spanEnd = 0
@@ -102,6 +104,8 @@ class SearchBgHelper(
     private var endLine = 0
     private var startOffset = 0
     private var endOffset = 0
+    private var topExtraPadding = 0
+    private var bottomExtraPadding = 0
 
     fun draw(canvas: Canvas, text: Spanned, layout: Layout) {
         spans = text.getSpans()
@@ -111,12 +115,35 @@ class SearchBgHelper(
             startLine = layout.getLineForOffset(spanStart)
             endLine = layout.getLineForOffset(spanEnd)
 
+            headerSpans = text.getSpans(spanStart, spanEnd, HeaderSpan::class.java)
+
+            topExtraPadding = 0
+            bottomExtraPadding = 0
+
+            if (headerSpans.isNotEmpty()) {
+                topExtraPadding =
+                    if (spanStart in headerSpans[0].firstLineBounds
+                        || spanEnd in headerSpans[0].firstLineBounds
+                    ) headerSpans[0].topExtraPadding else 0
+                bottomExtraPadding =
+                    if (spanStart in headerSpans[0].lastLineBounds
+                        || spanEnd in headerSpans[0].lastLineBounds
+                    ) headerSpans[0].bottomExtraPadding else 0
+            }
+
             startOffset = layout.getPrimaryHorizontal(spanStart).toInt()
             endOffset = layout.getPrimaryHorizontal(spanEnd).toInt()
 
             render = if (startLine == endLine) singleLineRender else multiLineRender
             render.draw(
-                canvas, layout, startLine, endLine, startOffset, endOffset
+                canvas,
+                layout,
+                startLine,
+                endLine,
+                startOffset,
+                endOffset,
+                topExtraPadding,
+                bottomExtraPadding
             )
         }
     }
@@ -168,7 +195,7 @@ class SingleLineRender(
     ) {
         lineTop = getLineTop(layout, startLine) + topExtraPadding
         lineBottom = getLineBottom(layout, startLine) - bottomExtraPadding
-        drawable.setBounds(startOffset, lineTop, endOffset, lineBottom)
+        drawable.setBounds(startOffset - padding, lineTop, endOffset + padding, lineBottom)
         drawable.draw(canvas)
     }
 
