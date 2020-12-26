@@ -53,7 +53,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         setupBottombar()
         setupSubmenu()
 
-        scroll.addView(MarkdownImageView(this, 14f))
+        scroll.addView(MarkdownImageView(this, 14f, "https://anapacity.com/content/images/morya-krasnodarskogo-kraya.jpg", "sea", "it is sea"))
     }
 
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {

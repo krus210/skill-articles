@@ -11,12 +11,15 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnEnd
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.extensions.attrValue
-import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.extensions.dpToPx
-import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
+import ru.skillbranch.skillarticles.extensions.*
+import java.nio.charset.Charset
+import java.security.MessageDigest
 import kotlin.math.hypot
 
 
@@ -27,6 +30,11 @@ class MarkdownImageView(
 ) : ViewGroup(context, null, 0), IMarkdownView {
 
     override var fontSize: Float = fontSize
+        set(value) {
+            tv_title.textSize = value  * 0.75f
+            tv_alt?.textSize = value
+            field = value
+        }
 
     override val spannableContent: Spannable
         get() = tv_title.text as Spannable
@@ -73,8 +81,8 @@ class MarkdownImageView(
     }
 
     init {
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             scaleType = ImageView.ScaleType.CENTER_CROP
             setImageResource(R.drawable.ic_launcher_background)
             outlineProvider = object : ViewOutlineProvider() {
@@ -95,7 +103,6 @@ class MarkdownImageView(
             gravity = Gravity.CENTER
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setPaddingOptionally(left = titlePadding, right = titlePadding)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         }
 
         addView(tv_title)
@@ -108,7 +115,35 @@ class MarkdownImageView(
         title: CharSequence,
         alt: String?
     ) : this(context, fontSize) {
-        //TODO implement me
+        imageUrl = url
+        imageTitle = title
+        tv_title.setText(title, TextView.BufferType.SPANNABLE)
+
+        Glide
+            .with(context)
+            .load(url)
+            .transform(AspectRatioResizeTransform())
+            .into(iv_image)
+
+
+        if (alt != null) {
+            tv_alt = TextView(context).apply {
+                text = alt
+                setTextColor(colorOnSurface)
+                setBackgroundColor(ColorUtils.setAlphaComponent(colorSurface, 160))
+                gravity = Gravity.CENTER
+                textSize = fontSize
+                setPadding(titleTopMargin)
+                isVisible = false
+            }
+        }
+
+        addView(tv_alt)
+
+        iv_image.setOnClickListener {
+            if (tv_alt?.isVisible == true) animateHideAlt()
+            else animateShowAlt()
+        }
     }
 
 
@@ -116,8 +151,15 @@ class MarkdownImageView(
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = 0
         val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        measureChild(iv_image, widthMeasureSpec, heightMeasureSpec)
-        measureChild(tv_title, widthMeasureSpec, heightMeasureSpec)
+
+        //create measureSpec for children EXACTLY
+        //all children width == parent width (constraint parent width)
+        val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+
+
+        iv_image.measure(ms, heightMeasureSpec)
+        tv_title.measure(ms, heightMeasureSpec)
+        tv_alt?.measure(ms, heightMeasureSpec)
 
         usedHeight += iv_image.measuredHeight
         usedHeight += titleTopMargin
@@ -148,6 +190,13 @@ class MarkdownImageView(
             usedHeight,
             right,
             usedHeight + tv_title.measuredHeight
+        )
+
+        tv_alt?.layout(
+            left,
+            iv_image.measuredHeight - (tv_alt?.measuredHeight ?:0),
+            right,
+            iv_image.measuredHeight
         )
     }
 
@@ -199,28 +248,32 @@ class MarkdownImageView(
     }
 }
 
-//class AspectRatioResizeTransform : BitmapTransformation() {
-//    private val ID =
-//        "ru.skillbranch.skillarticles.glide.AspectRatioResizeTransform" //any unique string
-//    private val ID_BYTES = ID.toByteArray(Charset.forName("UTF-8"))
-//    override fun updateDiskCacheKey(messageDigest: MessageDigest) {
-//        //TODO implement me
-//    }
-//
-//    override fun transform(
-//        pool: BitmapPool,
-//        toTransform: Bitmap,
-//        outWidth: Int,
-//        outHeight: Int
-//    ): Bitmap {
-//        //TODO implement me
-//    }
-//
-//    override fun equals(other: Any?): Boolean {
-//        //TODO implement me
-//    }
-//
-//    override fun hashCode(): Int {
-//        //TODO implement me
-//    }
-//}
+class AspectRatioResizeTransform : BitmapTransformation() {
+    private val ID =
+        "ru.skillbranch.skillarticles.glide.AspectRatioResizeTransform" //any unique string
+    private val ID_BYTES = ID.toByteArray(Charset.forName("UTF-8"))
+    override fun updateDiskCacheKey(messageDigest: MessageDigest) {
+        messageDigest.update(ID_BYTES)
+    }
+
+    override fun transform(
+        pool: BitmapPool,
+        toTransform: Bitmap,
+        outWidth: Int,
+        outHeight: Int
+    ): Bitmap {
+        val originWidth = toTransform.width
+        val originHeight = toTransform.height
+        val aspectRatio = originWidth.toFloat() / originHeight
+        return Bitmap.createScaledBitmap(
+            toTransform,
+            outWidth,
+            (outWidth / aspectRatio).toInt(),
+            true
+        )
+    }
+
+    override fun equals(other: Any?): Boolean = other is AspectRatioResizeTransform
+
+    override fun hashCode(): Int = ID.hashCode()
+}

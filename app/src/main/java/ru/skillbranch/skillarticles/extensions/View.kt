@@ -26,3 +26,9 @@ fun View.setPaddingOptionally(
 ) {
     this.setPadding(left, top, right, bottom)
 }
+
+fun View.setPadding(
+    padding: Int = marginTop
+) {
+    this.setPadding(padding, padding, padding, padding)
+}
