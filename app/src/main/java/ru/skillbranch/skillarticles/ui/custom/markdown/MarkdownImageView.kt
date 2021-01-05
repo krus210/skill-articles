@@ -81,6 +81,9 @@ class MarkdownImageView(
     }
 
     init {
+
+//        setBackgroundColor(Color.RED)
+
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -97,7 +100,7 @@ class MarkdownImageView(
         }
         addView(iv_image)
 
-        tv_title = MarkdownTextView(context).apply {
+        tv_title = MarkdownTextView(context, fontSize * 0.75f).apply {
             setText("title", TextView.BufferType.SPANNABLE)
             setTextColor(colorOnBackground)
             gravity = Gravity.CENTER

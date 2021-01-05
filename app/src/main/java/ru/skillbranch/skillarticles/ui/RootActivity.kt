@@ -22,6 +22,7 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
 import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
@@ -53,7 +54,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         setupBottombar()
         setupSubmenu()
 
-        scroll.addView(MarkdownImageView(this, 14f, "https://anapacity.com/content/images/morya-krasnodarskogo-kraya.jpg", "sea", "it is sea"))
     }
 
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
@@ -275,14 +275,9 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         private var searchResults: List<Pair<Int, Int>> by ObserveProp(emptyList())
         private var searchPosition: Int by ObserveProp(0)
 
-        private var content: String by ObserveProp("loading") {
-//            MarkdownBuilder(this@RootActivity)
-//                .markdownToSpan(it)
-//                .run {
-//                    tv_text_content.setText(this, TextView.BufferType.SPANNABLE)
-//                }
-//
-//            tv_text_content.movementMethod = LinkMovementMethod.getInstance()
+        private var content: List<MarkdownElement> by ObserveProp(emptyList()) {
+            tv_text_content.isLoading = it.isEmpty()
+            tv_text_content.setContent(it)
         }
 
         override fun onFinishInflate() {
@@ -316,7 +311,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category
             if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int
-            if (data.content !=null) content = data.content
+            content = data.content
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
