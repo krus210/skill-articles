@@ -56,52 +56,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
     }
 
-    override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
-//        Log.d("result", searchResult.toString())
-//        val content = tv_text_content.text as Spannable
-//        tv_text_content.isVisible
-//        //clear entry search result (hometask_4)
-//        clearSearchResult()
-//
-//        searchResult.forEach { (start, end) ->
-//            content.setSpan(
-//                SearchSpan(),
-//                start,
-//                end,
-//                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
-//            )
-//        }
-
-//        //scrolled to first searched element
-//        renderSearchPosition(0)
-    }
-
-    override fun renderSearchPosition(searchPosition: Int) {
-//        val content = tv_text_content.text as Spannable
-//
-//        val spans = content.getSpans<SearchSpan>()
-//        //clear last search position
-//        content.getSpans<SearchFocusSpan>()
-//            .forEach { content.removeSpan(it) }
-//
-//        if (spans.isNotEmpty()) {
-//            val result = spans[searchPosition]
-//            Selection.setSelection(content, content.getSpanStart(result))
-//            content.setSpan(
-//                SearchFocusSpan(),
-//                content.getSpanStart(result),
-//                content.getSpanEnd(result),
-//                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
-//            )
-//        }
-    }
-
-    override fun clearSearchResult() {
-//        val content = tv_text_content.text as Spannable
-//        content.getSpans<SearchSpan>()
-//            .forEach { content.removeSpan(it) }
-    }
-
     override fun showSearchBar() {
         bottombar.setSearchState(true)
         scroll.setMarginOptionally(bottom = dpToIntPx(56))
@@ -288,11 +242,11 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 ::searchPosition
             ) { ilc, iss, sr, sp ->
                 if (!ilc && iss) {
-                    renderSearchResult(sr)
-                    renderSearchPosition(sp)
+                    tv_text_content.renderSearchResult(sr)
+                    tv_text_content.renderSearchPosition(sr.getOrNull(sp))
                 }
                 if (!ilc && !iss) {
-                    clearSearchResult()
+                    tv_text_content.clearSearchResult()
                 }
 
                 bottombar.bindSearchInfo(sr.size, sp)
