@@ -1,5 +1,8 @@
 package ru.skillbranch.skillarticles.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.text.Selection
 import android.text.Spannable
@@ -16,6 +19,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.text.getSpans
 import androidx.core.view.isVisible
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
@@ -189,6 +193,15 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         }
     }
 
+    private fun setupCopyListener() {
+        tv_text_content.setCopyListener { copy ->
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Copied code", copy)
+            clipboard.setPrimaryClip(clip)
+            viewModel.handleCopyCode()
+        }
+    }
+
     inner class ArticleBinding: Binding() {
         var isFocusedSearch: Boolean = false
         var searchQuery: String? = null
@@ -224,7 +237,20 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         }
 
         var isSearch: Boolean by ObserveProp(false) {
-            if (it) showSearchBar() else hideSearchBar()
+            if (it) {
+                showSearchBar()
+                with (toolbar) {
+                    (layoutParams as AppBarLayout.LayoutParams).scrollFlags =
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+                }
+            } else {
+                hideSearchBar()
+                with (toolbar) {
+                    (layoutParams as AppBarLayout.LayoutParams).scrollFlags =
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                                AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED
+                }
+            }
         }
 
         private var searchResults: List<Pair<Int, Int>> by ObserveProp(emptyList())
@@ -233,6 +259,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         private var content: List<MarkdownElement> by ObserveProp(emptyList()) {
             tv_text_content.isLoading = it.isEmpty()
             tv_text_content.setContent(it)
+            if (it.isNotEmpty()) setupCopyListener()
         }
 
         override fun onFinishInflate() {

@@ -150,6 +150,10 @@ class ArticleViewModel(private val articleId: String) :
         }
 
     }
+
+    fun handleCopyCode() {
+        notify(Notify.TextMessage("Code copy to clipboard"))
+    }
 }
 
 data class ArticleState(
