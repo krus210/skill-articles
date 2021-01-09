@@ -38,15 +38,15 @@ class MarkdownTextView constructor(
     private val color = context.attrValue(R.attr.colorOnBackground)
     private val focusRect = Rect()
 
-    private val searchBgHelper = SearchBgHelper(context) { top, bottom ->
-        focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
-        //show rect on view with animation
-        requestRectangleOnScreen(focusRect, false)
-    }
+    private val searchBgHelper : SearchBgHelper
 
     init {
 
-//        setBackgroundColor(Color.GREEN)
+        searchBgHelper = mockHelper ?: SearchBgHelper(context) { top, bottom ->
+            focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
+            //show rect on view with animation
+            requestRectangleOnScreen(focusRect, false)
+        }
 
         setTextColor(color)
         textSize = fontSize

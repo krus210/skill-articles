@@ -37,7 +37,7 @@ class SearchBgHelper(
     private val alphaColor: Int = ColorUtils.setAlphaComponent(secondaryColor, 160)
 
     private val drawable: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = FloatArray(8).apply { fill(radius, 0, size) }
             color = ColorStateList.valueOf(alphaColor)
@@ -46,7 +46,7 @@ class SearchBgHelper(
     }
 
     private val drawableLeft: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
                 radius, radius, //Top left radius in px
@@ -60,7 +60,7 @@ class SearchBgHelper(
     }
 
     private val drawableMiddle: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             color = ColorStateList.valueOf(alphaColor)
             setStroke(borderWidth, secondaryColor)
@@ -68,7 +68,7 @@ class SearchBgHelper(
     }
 
     private val drawableRight: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
                 0f, 0f, //Top left radius in px
@@ -82,19 +82,13 @@ class SearchBgHelper(
     }
 
     private lateinit var render: SearchBgRender
-    private val singleLineRender: SearchBgRender by lazy {
-        SingleLineRender(
-            padding, drawable
-        )
-    }
-    private val multiLineRender: SearchBgRender by lazy {
-        MultiLineRender(
+    private val singleLineRender: SearchBgRender  = SingleLineRender(padding, drawable)
+    private val multiLineRender: SearchBgRender = MultiLineRender(
             padding,
             drawableLeft,
             drawableMiddle,
             drawableRight
         )
-    }
 
     private lateinit var spans: Array<out SearchSpan>
     private lateinit var headerSpans: Array<out HeaderSpan>
