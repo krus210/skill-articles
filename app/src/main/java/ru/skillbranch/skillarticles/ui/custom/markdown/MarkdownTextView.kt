@@ -14,6 +14,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.graphics.withTranslation
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
+import ru.skillbranch.skillarticles.extensions.dpToIntPx
 
 @SuppressLint("ViewConstructor", "AppCompatCustomView")
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -38,7 +39,9 @@ class MarkdownTextView constructor(
     private val focusRect = Rect()
 
     private val searchBgHelper = SearchBgHelper(context) { top, bottom ->
-        //TODO implement me
+        focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
+        //show rect on view with animation
+        requestRectangleOnScreen(focusRect, false)
     }
 
     init {

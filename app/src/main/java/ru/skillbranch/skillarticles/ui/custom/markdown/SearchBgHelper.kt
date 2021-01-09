@@ -13,6 +13,7 @@ import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.custom.spans.HeaderSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.SearchFocusSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -114,6 +115,11 @@ class SearchBgHelper(
             spanEnd = text.getSpanEnd(it)
             startLine = layout.getLineForOffset(spanStart)
             endLine = layout.getLineForOffset(spanEnd)
+
+            if (it is SearchFocusSpan) {
+                //if searchFocusListener is focus
+                focusListener?.invoke(layout.getLineTop(startLine), layout.getLineBottom(startLine))
+            }
 
             headerSpans = text.getSpans(spanStart, spanEnd, HeaderSpan::class.java)
 
@@ -242,7 +248,7 @@ class MultiLineRender(
         }
 
         //draw last line
-        lineStartOffset = (layout.getLineLeft(endLine) - padding).toInt()
+        lineStartOffset = (layout.getLineLeft(startLine) - padding).toInt()
         lineTop = getLineTop(layout, endLine)
         lineBottom = getLineBottom(layout, endLine) - bottomExtraPadding
         drawEnd(canvas, lineStartOffset, lineTop, endOffset + padding, lineBottom)

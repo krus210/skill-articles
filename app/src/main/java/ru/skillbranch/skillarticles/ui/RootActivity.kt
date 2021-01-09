@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.hideKeyboard
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
 import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
@@ -157,14 +158,14 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         btn_settings.setOnClickListener { viewModel.handleToggleMenu() }
 
         btn_result_up.setOnClickListener {
-            if (search_view.hasFocus()) search_view.clearFocus()
-//            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
+            hideKeyboard(it)
             viewModel.handleUpResults()
         }
 
         btn_result_down.setOnClickListener {
-            if (search_view.hasFocus()) search_view.clearFocus()
-//            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
+            if (!tv_text_content.hasFocus()) tv_text_content.requestFocus()
+            hideKeyboard(it)
             viewModel.handleDownResults()
         }
 
@@ -206,15 +207,15 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             toolbar.logo = getDrawable(it)
         }
         private var isBigText: Boolean by RenderProp(false) {
-//            if (it) {
-//                tv_text_content.textSize = 18f
-//                btn_text_up.isChecked = true
-//                btn_text_down.isChecked = false
-//            } else {
-//                tv_text_content.textSize = 14f
-//                btn_text_up.isChecked = false
-//                btn_text_down.isChecked = true
-//            }
+            if (it) {
+                tv_text_content.textSize = 18f
+                btn_text_up.isChecked = true
+                btn_text_down.isChecked = false
+            } else {
+                tv_text_content.textSize = 14f
+                btn_text_up.isChecked = false
+                btn_text_down.isChecked = true
+            }
         }
         private var isDarkMode: Boolean by RenderProp(false, false) {
             switch_mode.isChecked = it

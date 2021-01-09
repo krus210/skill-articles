@@ -31,7 +31,7 @@ class MarkdownContentView @JvmOverloads constructor(
         }
     }
     var isLoading: Boolean = true
-//    val padding //8dp
+    val padding = context.dpToIntPx(8)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = paddingTop
@@ -80,7 +80,7 @@ class MarkdownContentView @JvmOverloads constructor(
             when (it) {
                 is MarkdownElement.Text -> {
                     val tv = MarkdownTextView(context, textSize).apply {
-                        setPaddingOptionally(left = context.dpToIntPx(8), right = context.dpToIntPx(8))
+                        setPaddingOptionally(left = padding, right = padding)
                         setLineSpacing(fontSize * 0.5f, 1f)
                     }
 
@@ -104,7 +104,14 @@ class MarkdownContentView @JvmOverloads constructor(
                     addView(iv)
                 }
                 is MarkdownElement.Scroll -> {
-                    //TODO
+                    val sv = MarkdownCodeView(
+                        context,
+                        textSize,
+                        it.blockCode.text
+
+                    )
+
+                    addView(sv)
                 }
             }
         }
@@ -120,7 +127,9 @@ class MarkdownContentView @JvmOverloads constructor(
 
         val bounds= elements.map { it.bounds }
         val result = searchResult.groupByBounds(bounds)
-
+        Log.d("groupByBounds", "bounds last = ${bounds.last()}, index = ${bounds.lastIndex}")
+        Log.d("groupByBounds", "searchResult = $searchResult")
+        Log.d("groupByBounds", "result last = ${result.last()}, index = ${result.lastIndex}")
 
         children.forEachIndexed{ index, view ->
             view as IMarkdownView
